@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>study-spark-ai</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="app-wrapper">
+        
+        <p class="slogan">Your Personal AI-Powered Study Partner</p>
+
+        <div class="container">
+            <h1>Study-Spark.ai</h1>
+            
+            <form action="/generate" method="POST">
+                <input type="text" name="topic" placeholder="Enter a topic... e.g., 'General Relativity'" required autocomplete="off">
+                <button type="submit">Generate</button>
+            </form>
+
+            <% if (topic) { %>
+                <div class="result content-grid">
+                    <main class="main-content">
+                        <h2>Topic: <span><%= topic %></span></h2>
+                        <% if (explanation) { %>
+                            <div class="explanation content-section">
+                                <h3>Explanation</h3>
+                                <p><%- explanation.replace(/\n/g, '<br>') %></p>
+                            </div>
+                        <% } %>
+                        <% if (questions && questions.length > 0) { %>
+                            <div class="questions content-section">
+                                <h3>Practice Questions</h3>
+                                <ul>
+                                    <% questions.forEach(question => { %>
+                                        <li><%- question %></li>
+                                    <% }) %>
+                                </ul>
+                            </div>
+                        <% } %>
+                    </main>
+
+                    <aside class="sidebar">
+                        <% if (equations && equations.length > 0) { %>
+                            <div class="accordion-item">
+                                <button class="accordion-header"><i class="fa-solid <%- dynamicSectionIcon %>"></i><h3><%- dynamicSectionTitle %></h3></button>
+                                <div class="accordion-content">
+                                    <% if (isMathContent) { %>
+                                        <% equations.forEach(eq => { %>
+                                            <div class="equation-container">
+                                                <div class="equation">\(<%- eq.math %>\)</div>
+                                                <% if (eq.description) { %>
+                                                    <p class="equation-description">(<%- eq.description %>)</p>
+                                                <% } %>
+                                            </div>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <div class="markdown-content">
+                                            <%- equations[0].math %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% } %>
+                        <% if (concepts && concepts.length > 0) { %>
+                            <div class="accordion-item">
+                                <button class="accordion-header"><i class="fa-solid fa-lightbulb"></i><h3>Key Concepts</h3></button>
+                                <div class="accordion-content">
+                                    <ul>
+                                        <% concepts.forEach(concept => { %>
+                                            <li><strong><%- concept.term %>:</strong> <%- concept.definition %></li>
+                                        <% }) %>
+                                    </ul>
+                                </div>
+                            </div>
+                        <% } %>
+                        <% if (imageKeywords && imageKeywords.length > 0) { %>
+                            <div class="accordion-item">
+                                <button class="accordion-header"><i class="fa-solid fa-image"></i><h3>Image Suggestions</h3></button>
+                                <div class="accordion-content">
+                                    <ul>
+                                        <% imageKeywords.forEach(keyword => { %>
+                                            <li><%- keyword.replace(/^[\*-]\s*/, '') %></li>
+                                        <% }) %>
+                                    </ul>
+                                </div>
+                            </div>
+                        <% } %>
+                    </aside>
+                </div>
+            <% } %>
+        </div>
+        <%- include("footer.ejs") %>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    header.classList.toggle('active');
+                    const content = header.nextElementSibling;
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                    }
+                });
+            });
+
+            if(accordionHeaders.length > 0) {
+                accordionHeaders[0].click();
+            }
+        });
+    </script>
+    
+    <script>
+        if (window.MathJax) {
+            MathJax.typeset();
+        }
+    </script>
+
+</body>
+</html>
