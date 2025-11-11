@@ -298,13 +298,59 @@ form button:hover {
     }
 }
 
+/*
+========================================
+  Mobile Responsive Adjustments
+========================================
+*/
 @media (max-width: 600px) {
-    .equation {
-        font-size: 1em;
+    /* Make body padding smaller on mobile */
+    body {
+        padding: 20px 10px;
     }
 
+    /* Reduce container padding significantly */
     .container {
-        padding: 20px;
+        padding: 25px 15px;
+    }
+    
+    /* Reduce heading font size and letter spacing */
+    h1 {
+        font-size: 2em;
+        letter-spacing: 2px;
+    }
+
+    /* Reduce slogan font size and padding */
+    .slogan {
+        font-size: 1em;
+        padding: 10px 15px;
+        text-align: center;
+    }
+
+    /* --- THIS IS THE FIX FOR THE FORM --- */
+    /* Stack the input and button vertically */
+    form {
+        flex-direction: column;
+    }
+
+    /* Make the button full width */
+    form button {
+        width: 100%;
+    }
+
+    /* --- THIS IS THE FIX FOR THE GRID --- */
+    /* Stack the main content and sidebar vertically */
+    .content-grid {
+        grid-template-columns: 1fr; /* Go from 2 columns to 1 */
+    }
+
+    .sidebar {
+        margin-top: 40px;
+    }
+
+    /* Adjust math/code equation font size for mobile */
+    .equation {
+        font-size: 1em;
     }
 }
 .accordion-content .markdown-content {
