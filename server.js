@@ -1,8 +1,14 @@
-const express = require('express');
-const path = require('path');
-const { marked } = require('marked');
-require('dotenv').config();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+import express from "express";
+import path from "path";
+import dotenv from "dotenv";
+import { marked } from "marked";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+dotenv.config();
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
 
 const app = express();
 const port = process.env.PORT || 3000;
