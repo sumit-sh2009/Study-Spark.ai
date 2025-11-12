@@ -1,3 +1,5 @@
+// Import all libraries and frameworks
+// -----------------------------------------------------------------------
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
@@ -8,19 +10,29 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
-
+//Express service and web initiation
+//-------------------------------------------------------------------------
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Google gemini API
+//-------------------------------------------------------------------------
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+//Setting up relative path to views
+//-------------------------------------------------------------------------
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+//Setting up relative path to public
+//-------------------------------------------------------------------------
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+                                                                //App initiation.
+
+//Home page
+//--------------------------------------------------------------------------
 app.get('/', (req, res) => {
     res.render('index', {
         topic: null,
@@ -32,12 +44,15 @@ app.get('/', (req, res) => {
     });
 });
 
+//Submiting user request and getting response
+//-----------------------------------------------------------------------------
 app.post('/generate', async (req, res) => {
-    const { topic } = req.body;
+    const { topic } = req.body; // topic = req.body.topic
 
-    try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    try {  
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' }); //Model selection
 
+        //Prompt to gemini api
         const prompt = `
            You are a helpful learning assistant. For the topic "${topic}", provide the following information in clearly separated sections:
             
@@ -68,9 +83,9 @@ app.post('/generate', async (req, res) => {
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        const text = response.text();
+        const text = response.text();  //In plain text
 
-        const parseSection = (title, join = false) => {
+        const parseSection = (title, join = false) => { // For seperating topics
             const regex = new RegExp(`## ${title}\\s*([\\s\\S]*?)(?=\\s*##|$)`);
             const match = text.match(regex);
             if (!match || !match[1]) return join ? '' : [];
@@ -78,6 +93,8 @@ app.post('/generate', async (req, res) => {
             return join ? lines.join('\n') : lines;
         };
 
+        //Defining seperated topics
+        //-----------------------------------------------------------------------------------
         const topicCategory = parseSection("Topic Category", true).trim().toLowerCase();
         const dynamicSectionTitle = parseSection("Dynamic Section Title", true) || 'Key Information';
         const dynamicSectionIcon = parseSection("Dynamic Section Icon", true) || 'fa-circle-info';
@@ -89,8 +106,9 @@ app.post('/generate', async (req, res) => {
 
         let explanation, questions, equations, concepts;
 
-        let isMathContent = (topicCategory === 'science' && contentRaw.includes('$'));
+        let isMathContent = (topicCategory === 'science' && contentRaw.includes('$')); // Assigning content under Math category
 
+        // Contents logistics falling under Math
         if (isMathContent) {
             explanation = marked(rawExplanation).replace(/\$(.*?)\$/g, '\\($1\\)');
             questions = questionsRaw.map(q => marked.parseInline(q.replace(/^\d+\.\s*/, '')).replace(/\$(.*?)\$/g, '\\($1\\)'));
@@ -108,6 +126,9 @@ app.post('/generate', async (req, res) => {
                 const definition = match[2].trim().replace(/\$(.*?)\$/g, '\\($1\\)');
                 return { term, definition };
             }).filter(Boolean);
+        
+        // For descriptive contents    
+        //----------------------------------------------------------------------------------------------------
         } else {
             explanation = marked(rawExplanation);
             questions = questionsRaw.map(q => marked.parseInline(q.replace(/^\d+\.\s*/, '')));
@@ -120,7 +141,7 @@ app.post('/generate', async (req, res) => {
                 return { term, definition };
             }).filter(Boolean);
         }
-
+        // Updatig page
         res.render('index', {
             topic: topic,
             explanation: explanation,
@@ -132,13 +153,20 @@ app.post('/generate', async (req, res) => {
             imageKeywords: imageKeywords,
             isMathContent: isMathContent
         });
-
+    // Error handling
+    // -----------------------------------------------------------------------------------------------------------------------
     } catch (error) {
         console.error('Error generating content:', error);
         res.render('index', {
-            topic: topic, explanation: 'An error occurred...',
-            questions: [], equations: [], concepts: [], imageKeywords: [],
-            dynamicSectionTitle: 'Error', dynamicSectionIcon: 'fa-bug', isMathContent: false
+            topic: topic,
+            explanation: 'An error occurred...',
+            questions: [],
+            equations: [],
+            concepts: [],
+            imageKeywords: [],
+            dynamicSectionTitle: 'Error',
+            dynamicSectionIcon: 'fa-bug',
+            isMathContent: false
         });
     }
 });
