@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
 //-------------------------------------------------------------------------
 const app = express();
 const port = process.env.PORT || 3000;
-
+export default app;
 // Google gemini API
 //-------------------------------------------------------------------------
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -169,7 +169,4 @@ app.post('/generate', async (req, res) => {
             isMathContent: false
         });
     }
-});
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
 });
